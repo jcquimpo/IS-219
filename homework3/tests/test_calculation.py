@@ -30,7 +30,7 @@ def test_calculation_operations(var1, var2, operation, expected):
     """
     calc = Calculation(var1, var2, operation)
     assert calc.perform() == expected, f"Failed {operation.__name__} operation with {var1} and {var2}"
-    
+
 def test_calculation_repr():
     """
     Test the string representation (__repr__) of the Calculation class.
@@ -39,7 +39,7 @@ def test_calculation_repr():
     """
     calc = Calculation(Decimal('10'), Decimal('5'), add)
     expected_repr = "Calculation(10, 5, add)"
-    assert calc.__repr__() == expected_repr
+    assert repr(calc) == expected_repr
 
 def test_divide_by_zero():
     """
