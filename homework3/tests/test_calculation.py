@@ -5,7 +5,7 @@ import pytest
 from calculator.calculation import Calculation
 from calculator.operations import add, subtract, multiply, divide
 
-@pytest.mark.parametrize("a, b, operation, expected", [
+@pytest.mark.parametrize("var1, var2, operation, expected", [
     (Decimal('10'), Decimal('5'), add, Decimal('15')),
     (Decimal('10'), Decimal('5'), subtract, Decimal('5')),
     (Decimal('10'), Decimal('5'), multiply, Decimal('50')),
@@ -16,7 +16,7 @@ from calculator.operations import add, subtract, multiply, divide
     (Decimal('10'), Decimal('0.5'), divide, Decimal('20'))
 ])
 
-def test_calculation_operations(a, b, operation, expected):
+def test_calculation_operations(var1, var2, operation, expected):
     """
     Test calculation operations with various scenarios.
     This test ensures that the Calculation class correctly performs the arithmetic operation
@@ -28,9 +28,9 @@ def test_calculation_operations(a, b, operation, expected):
         operation (function): The arithmetic operation to perform.
         expected (Decimal): The expected result of the operation.
     """
-    calc = Calculation(a, b, operation)
-    assert calc.perform() == expected, f"Failed {operation.__name__} operation with {a} and {b}"
-
+    calc = Calculation(var1, var2, operation)
+    assert calc.perform() == expected, f"Failed {operation.__name__} operation with {var1} and {var2}"
+    
 def test_calculation_repr():
     """
     Test the string representation (__repr__) of the Calculation class.
