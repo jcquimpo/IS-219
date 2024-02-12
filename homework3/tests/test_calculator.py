@@ -1,18 +1,18 @@
-'''Homework 3 Calculator'''
-from calculator import add, subtract, multiply, divide
+'''Calculator Tests'''
+from calculator import Calculator
 
 def test_addition():
-    '''Test that addition function works '''
-    assert add(2,2) == 4
+    '''Addition function Test'''
+    assert Calculator.add(2,2) == 4
 
 def test_subtraction():
-    '''Test that subtraction function works '''
-    assert subtract(2,2) == 0
+    '''Subtraction function Test'''
+    assert Calculator.subtract(2,2) == 0
+
+def test_divide():
+    '''Division function Test'''
+    assert Calculator.divide(2,2) == 1
 
 def test_multiply():
-    '''Test that multiply function works '''
-    assert multiply(2,2) == 4
-
-def test_division():
-    '''Test that division function works '''
-    assert divide(2,2) == 1
+    '''Multiplication function Test'''
+    assert Calculator.multiply(2,2) == 4
