@@ -1,23 +1,26 @@
+import pkgutil
+import importlib
 from app.commands import CommandHandler
-# from app.commands.exit import ExitCommand
-from app.commands.goodbye import GoodbyeCommand
-from app.commands.greet import GreetCommand
-from app.commands.menu import MenuCommand
-from app.commands.generate import GenerateCommand
+from app.commands import Command
 
 class App:
     def __init__(self): # Constructor
         self.command_handler = CommandHandler()
 
+    def load_plugins(self):
+        plugins_package = 'app.plugins'
+        for _, plugin_name, is_pkg in pkgutil.iter_modules([plugins_package.replace('.', '/')]):
+            if is_pkg:
+                plugin_module = importlib.import_module(f'{plugins_package}.{plugin_name}')
+                for item_name in dir(plugin_module):
+                    item = getattr(plugin_module, item_name)
+                    try:
+                        if issubclass(item, (Command)):  # Assuming a BaseCommand class exists
+                            self.command_handler.register_command(plugin_name, item())
+                    except TypeError:
+                        continue
     def start(self):
-        # Register commands here
-        self.command_handler.register_command("greet", GreetCommand())
-        self.command_handler.register_command("goodbye", GoodbyeCommand())
-        # put goodbye and exit command together
-        # self.command_handler.register_command("exit", ExitCommand())
-        self.command_handler.register_command("menu", MenuCommand())
-        self.command_handler.register_command("generate", GenerateCommand())
-        
-        print("Type 'goodbye' to exit.")
-        while True:  #REPL Read, Evaluate, Print, Loop
+        self.load_plugins()
+        print("Type 'exit' to exit.")
+        while True:
             self.command_handler.execute_command(input(">>> ").strip())
