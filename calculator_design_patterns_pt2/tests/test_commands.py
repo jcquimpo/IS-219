@@ -25,4 +25,4 @@ def test_app_menu_command(capfd, monkeypatch):
     with pytest.raises(SystemExit) as e:
         app.start()
 
-    assert str(e.value) == "Exiting...", "The app did not exit as expected"
+    assert str(e.value) == "Exiting...", "The app did not exit as expected" 
