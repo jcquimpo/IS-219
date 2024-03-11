@@ -2,6 +2,7 @@ import pkgutil
 import importlib
 from app.commands import CommandHandler
 from app.commands import Command
+from dotenv import load_dotenv
 
 class App:
     def __init__(self): # Constructor
