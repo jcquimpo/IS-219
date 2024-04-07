@@ -13,3 +13,4 @@ For this assignment I want you to watch the following two videos and create your
 
 ![alt text](image.png)
 ![alt text](image-1.png)
+ - Link to dockerhub: https://hub.docker.com/repository/docker/janq2/qr_code/general
