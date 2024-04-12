@@ -1,9 +1,11 @@
+'''start_test.py'''
 import pytest
 from httpx import AsyncClient
 from app.main import app  # Import your FastAPI app
 
 @pytest.mark.asyncio
 async def test_login_for_access_token():
+    '''function for testing login access token'''
     form_data = {
         "username": "admin",
         "password": "secret",
@@ -16,6 +18,7 @@ async def test_login_for_access_token():
 
 @pytest.mark.asyncio
 async def test_create_qr_code_unauthorized():
+    '''function for testing qr code generation'''
     # Attempt to create a QR code without authentication
     qr_request = {
         "url": "https://example.com",
@@ -29,6 +32,7 @@ async def test_create_qr_code_unauthorized():
 
 @pytest.mark.asyncio
 async def test_create_and_delete_qr_code():
+    '''function for testing qr code creation and deletion'''
     form_data = {
         "username": "admin",
         "password": "secret",
