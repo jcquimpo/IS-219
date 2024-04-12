@@ -14,6 +14,16 @@ jobs:
     strategy:
       matrix:
         python-version: [3.10.12] # Define Python versions here
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: myappdb
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v4
       
@@ -36,6 +46,8 @@ jobs:
           pip install -r requirements.txt
           
       - name: Run tests with Pytest
+        env:
+          DATABASE_URL: postgresql+asyncpg://user:password@localhost:5432/myappdb  # Configure the DATABASE_URL environment variable for tests
         run: pytest
 
   build-and-push-docker:
@@ -58,15 +70,15 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: jcquimpo/devops_demo:${{ github.sha }} # Uses the Git SHA for tagging
+          tags: kaw393939/wis_club_api:${{ github.sha }} # Uses the Git SHA for tagging
           platforms: linux/amd64,linux/arm64 # Multi-platform support
-          cache-from: type=registry,ref=jcquimpo/devops_demo:cache
+          cache-from: type=registry,ref=kaw393939/wis_club_api:cache
           cache-to: type=inline,mode=max
           
       - name: Scan the Docker image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'jcquimpo/devops_demo:${{ github.sha }}'
+          image-ref: 'kaw393939/wis_club_api:${{ github.sha }}'
           format: 'table'
           exit-code: '1' # Fail the job if vulnerabilities are found
           ignore-unfixed: true

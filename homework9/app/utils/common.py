@@ -2,16 +2,16 @@ import logging.config
 import os
 import base64
 from typing import List
-from dotenv import load_dotenv
-from jose import jwt
+from fastapi import HTTPException, status
+from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from app.config import ADMIN_PASSWORD, ADMIN_USER, ALGORITHM, SECRET_KEY
+from app.dependencies import get_settings
 import validators  # Make sure to install this package
 from urllib.parse import urlparse, urlunparse
 
-# Load environment variables from .env file for security and configuration.
-load_dotenv()
+from app.schemas.link_schema import Link
 
+settings = get_settings()
 def setup_logging():
     """
     Sets up logging for the application using a configuration file.
@@ -30,22 +30,17 @@ def authenticate_user(username: str, password: str):
     In a real application, replace this with actual authentication against a user database.
     """
     # Simple check against constants for demonstration.
-    if username == ADMIN_USER and password == ADMIN_PASSWORD:
+    if username == settings.admin_user and password == settings.admin_password:
         return {"username": username}
     # Log a warning if authentication fails.
     logging.warning(f"Authentication failed for user: {username}")
     return None
 
-def create_access_token(data: dict, expires_delta: timedelta = None):
-    """
-    Generates a JWT access token. Optionally, an expiration time can be specified.
-    """
-    # Copy user data and set expiration time for the token.
+def create_access_token(data: dict, expires_delta: timedelta):
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
+    expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
-    # Encode the data to create the JWT.
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
     return encoded_jwt
 
 def validate_and_sanitize_url(url_str):
@@ -61,6 +56,21 @@ def validate_and_sanitize_url(url_str):
         logging.error(f"Invalid URL provided: {url_str}")
         return None
 
+# Assuming this function already exists and returns a user object if credentials are valid
+def verify_refresh_token(refresh_token: str):
+    # Placeholder for refresh token verification logic
+    # You should validate the refresh token's signature and its expiration
+    # Also check if the token has been revoked or is still valid
+    try:
+        payload = jwt.decode(refresh_token, settings.secret_key, algorithms=[settings.algorithm])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+        # Implement additional checks here, such as token revocation or session validity
+        return {"username": username}
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+    
 def encode_url_to_filename(url):
     """
     Encodes a URL into a base64 string safe for filenames, after validating and sanitizing.
@@ -84,16 +94,11 @@ def decode_filename_to_url(encoded_str: str) -> str:
     decoded_bytes = base64.urlsafe_b64decode(encoded_str)
     return decoded_bytes.decode('utf-8')
 
-def generate_links(action: str, qr_filename: str, base_api_url: str, download_url: str) -> List[dict]:
-    """
-    Generates HATEOAS links for QR code resources, including view and delete actions.
-    This supports the application's RESTful architecture by providing links to possible actions.
-    """
+def generate_links(action: str, qr_filename: str, base_api_url: str, download_url: str) -> List[Link]:
     links = []
     if action in ["list", "create"]:
-        original_url = decode_filename_to_url(qr_filename[:-4])
-        links.append({"rel": "view", "href": download_url, "action": "GET", "type": "image/png"})
+        links.append(Link(rel="view", href=download_url, action="GET", type="image/png"))
     if action in ["list", "create", "delete"]:
         delete_url = f"{base_api_url}/qr-codes/{qr_filename}"
-        links.append({"rel": "delete", "href": delete_url, "action": "DELETE", "type": "application/json"})
+        links.append(Link(rel="delete", href=delete_url, action="DELETE", type="application/json"))
     return links
